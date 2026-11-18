@@ -1,24 +1,56 @@
 import AppKit
 import Carbon
+import Darwin
 
-@MainActor final class AppDelegate: NSObject, NSApplicationDelegate, NSMenuDelegate {
+@MainActor final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     let controller = Controller()
     let hotkeys = Hotkeys()
     var status: NSStatusItem!
     var resizeHint: NSPanel?
-    var operations: [String: () -> Void] = [:]
+    var preferences: Preferences?
+    var resizeKeys: [UInt32] = []
+    let popover = NSPopover()
+    var quickControls: QuickControls!
+    var popoverKeyMonitor: Any?
+    var commandTarget: AXUIElement?
+    var terminationSources: [DispatchSourceSignal] = []
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         status = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         status.button?.title = "▦"
         status.button?.toolTip = "CosmicTile · Control + Option + T para ativar"
-        let menu = NSMenu(); menu.delegate = self; status.menu = menu
-        controller.onChange = { [weak self] in self?.status.button?.title = self?.controller.enabled == true ? "▦ ON" : "▦" }
+        status.button?.target = self; status.button?.action = #selector(togglePopover)
+        status.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        quickControls = QuickControls(controller: controller)
+        quickControls.dismiss = { [weak self] in self?.popover.performClose(nil) }
+        quickControls.settings = { [weak self] in self?.showPreferences() }
+        quickControls.executeWindowCommand = { [weak self] operation in
+            guard let self else { return }
+            let target = commandTarget
+            popover.performClose(nil)
+            controller.commandWindow = target
+            if let target { Accessibility.focus(target) }
+            operation(); controller.commandWindow = nil
+        }
+        popover.contentViewController = quickControls; popover.behavior = .transient; popover.delegate = self
+        for number in [SIGTERM, SIGINT] {
+            signal(number, SIG_IGN)
+            let source = DispatchSource.makeSignalSource(signal: number, queue: .main)
+            source.setEventHandler { Task { @MainActor in NSApp.terminate(nil) } }
+            source.resume(); terminationSources.append(source)
+        }
+        controller.onChange = { [weak self] in
+            guard let self else { return }
+            updateStatus()
+            if popover.isShown { quickControls.refresh() }
+            if preferences?.window.isVisible == true { preferences?.refresh() }
+        }
         controller.onResizeMode = { [weak self] active in self?.showResizeHint(active) }
         hotkeys.add(kVK_ANSI_R) { [weak self] in self?.controller.toggleResize() }
         hotkeys.add(kVK_ANSI_O) { [weak self] in self?.controller.rotateFocused() }
         hotkeys.add(kVK_ANSI_Y) { [weak self] in self?.controller.toggle() }
         hotkeys.add(kVK_ANSI_G) { [weak self] in self?.controller.floatFocused() }
+        hotkeys.add(kVK_ANSI_T, shift: true) { [weak self] in self?.controller.toggleAll() }
         hotkeys.add(kVK_ANSI_T) { [weak self] in self?.controller.toggle() }
         hotkeys.add(kVK_ANSI_F) { [weak self] in self?.controller.floatFocused() }
         hotkeys.add(kVK_ANSI_M) { [weak self] in self?.controller.nextMonitor() }
@@ -29,16 +61,38 @@ import Carbon
             hotkeys.add(key, command: true) { [weak self] in self?.controller.resizeDirection(x, y) }
             hotkeys.add(key, shift: true) { [weak self] in self?.controller.neighbor(x, y, swap: true) }
         }
+        updateStatus()
+        if CommandLine.arguments.contains("--show-settings") { showPreferences() }
+        if CommandLine.arguments.contains("--show-controls") { DispatchQueue.main.async { self.togglePopover() } }
+    }
+    func updateStatus() {
+        let active = controller.monitorTiling.active.count
+        status.button?.title = controller.resizeMode ? "▦ ↔" : active > 0 ? "▦ \(active)/\(controller.screens.count)" : "▦"
+        status.button?.toolTip = "CosmicTile · \(active) monitores com tiling · Control + Option + T alterna a tela focada"
+    }
+    func showPreferences() {
+        if preferences == nil { preferences = Preferences(controller: controller) }
+        preferences?.openQuickControls = { [weak self] in self?.togglePopover() }
+        preferences?.show()
     }
     func showResizeHint(_ active: Bool) {
+        resizeKeys.forEach { hotkeys.remove($0) }; resizeKeys.removeAll()
+        if active {
+            for (key, x, y) in [(kVK_LeftArrow, -1.0, 0.0), (kVK_RightArrow, 1.0, 0.0), (kVK_UpArrow, 0.0, -1.0), (kVK_DownArrow, 0.0, 1.0)] {
+                if let id = hotkeys.add(key, modifiers: 0, action: { [weak self] in self?.controller.resizeDirection(x, y) }) { resizeKeys.append(id) }
+            }
+            for key in [kVK_Escape, kVK_Return] {
+                if let id = hotkeys.add(key, modifiers: 0, action: { [weak self] in self?.controller.toggleResize() }) { resizeKeys.append(id) }
+            }
+        }
         resizeHint?.orderOut(nil)
-        status.button?.title = active ? "▦ ↔" : controller.enabled ? "▦ ON" : "▦"
+        updateStatus()
         guard active else { return }
         let panel = NSPanel(contentRect: NSRect(x: 0, y: 0, width: 500, height: 94), styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         panel.level = .floating; panel.isOpaque = false; panel.backgroundColor = NSColor.windowBackgroundColor.withAlphaComponent(0.96)
         panel.hasShadow = true; panel.ignoresMouseEvents = true
         panel.collectionBehavior = [.canJoinAllSpaces, .fullScreenAuxiliary]
-        let text = NSTextField(wrappingLabelWithString: "REDIMENSIONAR\n← reduzir largura   → aumentar largura\n↑ reduzir altura   ↓ aumentar altura   ·   ⌃⌥R para sair")
+        let text = NSTextField(wrappingLabelWithString: "REDIMENSIONAR\n← reduzir largura   → aumentar largura\n↑ reduzir altura   ↓ aumentar altura   ·   Esc ou ⌃⌥R para sair")
         text.alignment = .center; text.font = .systemFont(ofSize: 14, weight: .medium)
         text.frame = NSRect(x: 16, y: 12, width: 468, height: 70)
         panel.contentView?.addSubview(text)
@@ -47,42 +101,28 @@ import Carbon
         if let frame = screen?.visibleFrame { panel.setFrameOrigin(NSPoint(x: frame.midX - 250, y: frame.minY + 28)) }
         panel.orderFrontRegardless(); resizeHint = panel
     }
-    func menuWillOpen(_ menu: NSMenu) {
-        menu.removeAllItems(); operations.removeAll()
-        func item(_ title: String, _ operation: (() -> Void)? = nil) {
-            let entry = NSMenuItem(title: title, action: operation == nil ? nil : #selector(performMenu(_:)), keyEquivalent: "")
-            entry.target = self; menu.addItem(entry); operations[title] = operation
-        }
-        item("CosmicTile · \(controller.screens.count) monitores")
-        item(controller.enabled ? "Desativar e restaurar · ⌃⌥T" : "Ativar tiling · ⌃⌥T") { [weak self] in self?.controller.toggle() }
-        if !AXIsProcessTrusted() {
-            item("Permitir Acessibilidade…") {
-                NSWorkspace.shared.open(URL(string: "x-apple.systempreferences:com.apple.preference.security?Privacy_Accessibility")!)
+    @objc func togglePopover() {
+        if popover.isShown { popover.performClose(nil); return }
+        commandTarget = Accessibility.focused()
+        controller.commandWindow = commandTarget
+        quickControls.refresh()
+        guard let button = status.button else { return }
+        NSApp.activate()
+        popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+        popover.contentViewController?.view.window?.makeKey()
+        popoverKeyMonitor = NSEvent.addLocalMonitorForEvents(matching: .keyDown) { [weak self] event in
+            let dismissed = MainActor.assumeIsolated {
+                if event.keyCode == 53, self?.popover.isShown == true { self?.popover.performClose(nil); return true }
+                return false
             }
+            return dismissed ? nil : event
         }
-        menu.addItem(.separator())
-        item("Alternar janela flutuante · ⌃⌥F") { [weak self] in self?.controller.floatFocused() }
-        item("Mover ao próximo monitor · ⌃⌥M") { [weak self] in self?.controller.nextMonitor() }
-        item(controller.resizeMode ? "Sair do modo redimensionar · ⌃⌥R" : "Redimensionar com setas · ⌃⌥R") { [weak self] in self?.controller.toggleResize() }
-        item("Alternar orientação da janela · ⌃⌥O") { [weak self] in self?.controller.rotateFocused() }
-        item("\(controller.automaticOrientation ? "✓ " : "")Orientação automática") { [weak self] in self?.controller.automaticOrientation.toggle() }
-        item("Nova divisão: \(controller.axis == .horizontal ? "horizontal" : "vertical")") { [weak self] in
-            guard let self else { return }; controller.automaticOrientation = false; controller.axis = controller.axis == .horizontal ? .vertical : .horizontal
-        }
-        for gap in [0, 6, 10, 16, 24] {
-            item("\(Int(controller.gap) == gap ? "✓ " : "")Espaçamento: \(gap) px") { [weak self] in
-                self?.controller.gap = Double(gap); UserDefaults.standard.set(Double(gap), forKey: "gap"); self?.controller.apply()
-            }
-        }
-        menu.addItem(.separator())
-        item("Focar: ⌃⌥ setas · Trocar: ⌃⌥⇧ setas")
-        item("Redimensionar direto: ⌃⌥⌘ setas")
-        item("Proporção da divisão: ⌃⌥ + / −")
-        if hotkeys.unavailable > 0 { item("\(hotkeys.unavailable) atalhos indisponíveis por conflito") }
-        if controller.failures > 0 { item("\(controller.failures) janelas recusaram ajuste") }
-        item("Sair e restaurar") { NSApp.terminate(nil) }
     }
-    @objc func performMenu(_ sender: NSMenuItem) { operations[sender.title]?() }
+    func popoverDidClose(_ notification: Notification) {
+        if let monitor = popoverKeyMonitor { NSEvent.removeMonitor(monitor) }
+        popoverKeyMonitor = nil; commandTarget = nil; controller.commandWindow = nil
+    }
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { showPreferences(); return true }
     func applicationWillTerminate(_ notification: Notification) { controller.stop() }
 }
 if CommandLine.arguments.contains("--diagnose") {

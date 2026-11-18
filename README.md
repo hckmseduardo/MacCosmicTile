@@ -1,110 +1,179 @@
-# MacCosmicTile
+<div align="center">
 
-A native macOS tiling window manager written in Swift and AppKit, inspired by the window management workflow of [COSMIC](https://system76.com/cosmic/).
+# ▦ MacCosmicTile
 
-**Early prototype · v0.2.0.** Independent project, not affiliated with System76. It manages existing application windows through the macOS Accessibility API; it does not replace the macOS compositor.
+**Cada tela, seu ritmo.**
 
-## Features
+A native Swift window manager for macOS, inspired by COSMIC.<br>
+Independent tiling per monitor · Active-window highlight · Keyboard resizing
 
-- Independent tiling tree for each monitor.
-- Automatic horizontal or vertical splits based on available space.
-- Placement near the previously focused window, with a preference for larger regions when the focused tile is crowded.
-- Directional focus, window swapping, split rotation, and keyboard resizing.
-- Resize mode with an on-screen shortcut guide.
-- Toggle individual windows between tiled and floating.
-- Move the focused window to the next monitor.
-- Adjustable gaps and manual split orientation through a menu bar app.
-- Restore original window frames when disabling tiling or quitting normally.
-- Detect connected and disconnected monitors.
+[Download for Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/latest) · [Português](docs/README.pt-BR.md) · [Keyboard shortcuts](#keyboard-shortcuts) · [Report a bug](https://github.com/hckmseduardo/MacCosmicTile/issues/new?template=bug_report.md)
 
-## Requirements
+</div>
 
-- macOS 14 or later; broader compatibility has not been tested.
-- Swift 6.2 toolchain (Xcode 26 or later).
-- Accessibility permission to control other apps' windows.
+![CosmicTile native settings: independent monitor switches, active-window highlight colors and border thickness](docs/images/settings.png)
 
-Built locally with Xcode 26.2 / Swift 6.2.3 on Apple Silicon. No third-party package dependencies. Intel builds have not been validated.
+> **Early preview · v0.3.0.** This is an independent project, not affiliated with System76. The screenshot shows the actual native settings window; its small layout preview is illustrative, not a capture of managed application windows.
 
-## Build and run
+## What it does
+
+| Feature | How it works |
+| --- | --- |
+| **A different workflow on each screen** | Enable tiling on one monitor and leave another floating. Each display has its own layout tree and on/off switch. |
+| **A visible focus** | A click-through border follows the active managed window. Choose cyan, violet or orange, and a 2, 3 or 5 pt stroke. |
+| **Automatic placement** | New windows split available space horizontally or vertically. A crowded focused tile gives way to a larger region. |
+| **Keyboard control** | Focus, swap, resize, rotate a split, float a window, or send it to another monitor. |
+| **A lightweight native app** | Swift + AppKit, a menu bar icon, and no third-party package dependencies. |
+| **Best-effort restoration** | Disabling a monitor restores its managed windows without switching off the other displays. Normal quit restores all managed displays. |
+
+## Install
+
+### Download the app
+
+1. Open [Releases](https://github.com/hckmseduardo/MacCosmicTile/releases/latest) and download the **macOS arm64** ZIP.
+2. Extract it and move `CosmicTile.app` into **Applications**.
+3. Open the app. Look for **▦** in the menu bar. Tiling starts **off**.
+4. Open **Ajustes, cores e guia de atalhos…** and grant Accessibility access as described below.
+
+The published bundle is **locally ad-hoc signed, not Developer ID signed or notarized**. macOS may prevent the first launch. Review the source/build provenance and, if you choose to proceed, use **System Settings → Privacy & Security → Open Anyway**. The project does not require disabling Gatekeeper or SIP.
+
+**Requirements:** macOS 14 or later. The downloadable build targets **Apple Silicon (arm64)**. Intel hardware has not been validated; build from source on Intel if you want to experiment. Compatibility with every macOS version and application is not established.
+
+### Build from source
+
+Install Xcode 26 or later, or a Swift 6.2-compatible toolchain:
 
 ```sh
 git clone https://github.com/hckmseduardo/MacCosmicTile.git
 cd MacCosmicTile
+swift test
 ./build-app.sh
 open dist/CosmicTile.app
 ```
 
-The app starts with tiling **off**. Look for **▦** in the menu bar, then select **Ativar tiling**.
-
-On the first activation, grant access in **System Settings → Privacy & Security → Accessibility**. Quit and reopen the app if needed, then activate tiling again. Keep the app at a stable path to reduce permission issues. Rebuilding a locally signed app may require renewing its Accessibility authorization.
-
-The build script creates a locally ad-hoc signed bundle. It does not produce a Developer ID signed or notarized distribution. Menu text is currently in Portuguese.
-
-## Keyboard shortcuts
-
-`⌃` = Control · `⌥` = Option · `⌘` = Command · `⇧` = Shift.
-
-| Shortcut | Action |
-| --- | --- |
-| `⌃⌥T` or `⌃⌥Y` | Toggle tiling; restore original frames when disabling |
-| `⌃⌥F` or `⌃⌥G` | Toggle focused window floating |
-| `⌃⌥← ↑ ↓ →` | Focus a window in that direction |
-| `⌃⌥⇧← ↑ ↓ →` | Swap with a window in that direction |
-| `⌃⌥R` | Enter/exit resize mode |
-| `⌃⌥← / →` in resize mode | Reduce/increase focused window width |
-| `⌃⌥↑ / ↓` in resize mode | Reduce/increase focused window height |
-| `⌃⌥⌘← ↑ ↓ →` | Resize directly without entering resize mode |
-| `⌃⌥O` | Rotate the focused window's immediate split |
-| `⌃⌥M` | Move focused window to next monitor |
-| `⌃⌥= / -` | Increase/decrease the focused leaf's immediate split proportion |
-
-Resizing adjusts neighboring tiles in the same split. It stops at configured ratio bounds. A direction has no effect if no ancestor split exists on that axis. The menu reports shortcut registration conflicts.
-
-## Development
-
-Open `Package.swift` in Xcode, or use Swift Package Manager:
-
-```sh
-swift test
-swift build -c release
-./build-app.sh
-dist/CosmicTile.app/Contents/MacOS/CosmicTile --diagnose
-```
-
-Override the output directory if needed:
+Open `Package.swift` in Xcode to develop. To change the app output directory:
 
 ```sh
 COSMICTILE_BUILD_DIR=/path/to/output ./build-app.sh
 ```
 
-### Architecture
+## First launch: Accessibility
 
-| Component | Responsibility |
+CosmicTile uses the macOS **Accessibility API** to read and adjust window positions and sizes. It does not replace the compositor or use private APIs to control Spaces.
+
+1. Open **System Settings → Privacy & Security → Accessibility**.
+2. Enable **CosmicTile**, adding the app with **+** if it is missing.
+3. Quit and reopen CosmicTile if the permission is not recognized.
+4. Enable tiling for the monitor you want to use.
+
+Keep the app in one stable location. Rebuilding or replacing a locally signed app can invalidate its Accessibility approval. If an update no longer moves windows, remove the outdated entry and add the current app again.
+
+## Everyday use
+
+### Choose which monitors tile
+
+Click **▦** to open the quick controls. Switch individual monitors on/off by name, or open the settings window for the same switches. The status icon shows the number of active displays, for example **▦ 1/2**.
+
+- **Control + Option + T** toggles only the monitor containing the focused window.
+- If no focused window is available, the monitor under the pointer is used.
+- **Control + Option + Shift + T** enables all connected monitors, or disables all when every monitor is already enabled.
+- Newly connected monitors start with tiling off. An already-active display stays active when another is disconnected.
+- Sending a window to a monitor with tiling off leaves it floating there.
+
+Quick controls close with **Escape**, the **Fechar ×** button, a click outside, or another click on the status icon. Window commands preserve the window selected before opening the panel.
+
+![Transient quick controls with per-monitor tiling switches and an explicit close button](docs/images/quick-controls.png)
+
+### Highlight the focused window
+
+Open **Ajustes, cores e guia de atalhos… → Monitores e destaque**:
+
+- Toggle **Destacar janela ativa**.
+- Choose **Ciano**, **Violeta** or **Laranja**.
+- Choose **2**, **3** or **5 pt** thickness.
+
+The transparent border follows the focused tiled/floating managed window on a tiling-enabled monitor. It does not take keyboard focus or intercept clicks. It hides for unmanaged windows, disabled displays, or when tiling is off. Color, width, enabled state and gap size persist between launches.
+
+### Resize a window
+
+1. Focus the window.
+2. Press **Control + Option + R**.
+3. Use **← / →** to reduce/increase width, and **↑ / ↓** to reduce/increase height.
+4. Press **Escape**, **Return**, or **Control + Option + R** to exit.
+
+While resize mode is active, unmodified arrow keys are temporarily captured. They are released when the mode ends. You can also resize directly with **Control + Option + Command + arrows**. Neighboring tiles adjust together; an axis has no effect if the layout has no matching ancestor split.
+
+## Keyboard shortcuts
+
+`⌃` = **Control** · `⌥` = **Option / Alt** · `⌘` = **Command** · `⇧` = **Shift**.
+
+| Shortcut | Action |
 | --- | --- |
-| `Sources/TileCore/Layout.swift` | Binary layout tree, frame calculation, removal, insertion, swaps, resizing, rotation |
-| `Sources/TileCore/Placement.swift` | Focus-aware placement and space heuristics |
-| `Sources/CosmicTile/Accessibility.swift` | Enumerate visible standard windows and read/write their frames |
-| `Sources/CosmicTile/Controller.swift` | Per-monitor state, reconciliation, focus, floating, restoration |
-| `Sources/CosmicTile/Hotkeys.swift` | Global Carbon hotkeys |
-| `Sources/CosmicTile/main.swift` | Menu bar lifecycle, controls, resize guide |
+| `⌃⌥T` or `⌃⌥Y` | Toggle tiling on the focused monitor |
+| `⌃⌥⇧T` | Toggle tiling on all monitors |
+| `⌃⌥F` or `⌃⌥G` | Toggle focused window floating |
+| `⌃⌥← ↑ ↓ →` | Focus a window in that direction |
+| `⌃⌥⇧← ↑ ↓ →` | Swap with a window in that direction |
+| `⌃⌥R` | Enter/exit resize mode |
+| `← / →` in resize mode | Reduce/increase width |
+| `↑ / ↓` in resize mode | Reduce/increase height |
+| `Esc` / `Return` in resize mode | Exit resize mode |
+| `⌃⌥⌘← ↑ ↓ →` | Resize directly without entering resize mode |
+| `⌃⌥O` | Rotate the focused window's immediate split |
+| `⌃⌥M` | Move the focused window to the next monitor |
+| `⌃⌥= / -` | Adjust the immediate split proportion |
 
-## Current limitations
+The settings window includes a native shortcut guide:
 
-- No tabbed stacks, group selection, drag-and-drop preview, active-window border, or persistent per-app rules yet.
-- Layouts are maintained for visible windows on the current macOS Space; there is no independent workspace system or per-Space layout persistence.
-- Reconciliation uses 350 ms polling. Frame application pauses during mouse dragging and only occurs when layout membership or monitor geometry changes, or after an explicit layout command.
-- Manual mouse resizing does not update stored split proportions.
-- Placement uses an approximate minimum of 480 × 300 points per tile. Applications can impose larger minimum sizes, so overlap remains possible in crowded layouts.
-- App-specific Accessibility behavior can prevent moving, focusing, or resizing a window. Minimized, fullscreen, nonstandard and hidden windows are excluded.
-- Restoring positions is best-effort, particularly after monitor disconnection. Forced termination cannot restore frames.
-- Settings are limited: gap size persists, layout trees and floating state do not.
+![CosmicTile native keyboard shortcut guide with modifier key explanations](docs/images/shortcuts.png)
 
-## Validation
+## Troubleshooting
 
-Unit tests cover insertion of newly focused windows, missing focus targets, focus-aware placement, crowded tiles, split geometry with negative monitor coordinates, gaps, removal, swapping, axis-specific resizing, and rotation.
+| Symptom | What to check |
+| --- | --- |
+| Nothing moves | Confirm Accessibility permission for the current app bundle, then enable that monitor. |
+| It worked before an update | Re-add the app's Accessibility entry and reopen it. |
+| The second monitor stays floating | Check its individual toggle. New displays are deliberately off by default. |
+| Windows overlap | Some applications impose minimum sizes. Try fewer windows, reduce gaps, rotate the split, or float the affected window. This preview does not yet solve arbitrary minimum-size constraints. |
+| A shortcut does nothing | Confirm tiling is on for the focused monitor and check conflicts with system/other-app shortcuts. |
+| Arrow keys are resizing instead of typing | Exit resize mode with Escape or Control + Option + R. |
+| The outline is missing | Enable the active hint and focus a managed window on an enabled monitor; it intentionally hides elsewhere. |
+| A popup stays open | Use Escape or **Fechar ×**. v0.3 replaces the old blocking native menu with transient quick controls. |
 
-A successful build and unit tests do not establish real-window behavior across all apps. Before everyday use, test opening three or more windows, resizing in both axes, transferring across monitors, disconnecting a monitor, changing Spaces, and disabling tiling to restore positions. The initial prototype was tried by the project owner; the v0.2 fixes still need live validation.
+A command-line diagnostic is available:
 
-## Contributing
+```sh
+dist/CosmicTile.app/Contents/MacOS/CosmicTile --diagnose
+```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for setup and useful bug report details, [CHANGELOG.md](CHANGELOG.md) for changes, and [docs/ROADMAP.md](docs/ROADMAP.md) for planned work.
+A diagnostic launched from a terminal may have a different Accessibility permission context from the app launched through Finder; the settings window reflects the running app's actual access.
+
+## Scope and known limitations
+
+- No tabbed stacks, ancestor-group selection, drag target previews, persistent application rules, or independent workspace system yet.
+- Only standard visible windows in the current macOS Space are considered; no per-Space layout persistence.
+- Reconciliation is polled at roughly 350 ms; the focus hint updates on a separate 120 ms tick. Frame application pauses during mouse dragging and does not run unconditionally on every tick.
+- Manual mouse resizing does not update stored split ratios.
+- Placement uses a 480 × 300 pt heuristic. Application-specific minimum sizes can still cause overlap or refused adjustments.
+- Secondary display geometry reserves the primary menu-bar inset when `visibleFrame` incorrectly reports the entire secondary screen as usable. More display/auto-hide arrangements need live testing.
+- Layouts, monitor activation and floating state are session-only. Newly launched apps start with all monitors disabled.
+- Restoration is best effort after display changes. Forced termination or a crash cannot guarantee restoration.
+- The app interface is currently Portuguese. The English README describes the same controls.
+
+## Development and validation
+
+The project has **22 unit tests** for placement, insertion, split geometry, negative coordinates, swaps, resizing, rotation, independent monitor state, display removal, restoration clamping and outline coordinate conversion. The native settings and shortcut views were inspected and captured on macOS. App-specific Accessibility behavior and full multi-monitor operation still require real-world validation; unit tests are not a substitute for it.
+
+| Source | Responsibility |
+| --- | --- |
+| `Sources/TileCore/Layout.swift` | Layout tree and transformations |
+| `Sources/TileCore/Placement.swift` | Focus-aware placement heuristics |
+| `Sources/TileCore/MonitorTiling.swift` | Per-monitor activation and display geometry |
+| `Sources/CosmicTile/Accessibility.swift` | Window discovery and AX operations |
+| `Sources/CosmicTile/Controller.swift` | Reconciliation, commands and restoration |
+| `Sources/CosmicTile/FocusIndicator.swift` | Click-through active-window outline |
+| `Sources/CosmicTile/QuickControls.swift` | Transient status-panel controls |
+| `Sources/CosmicTile/Preferences.swift` | Native settings, preview and shortcut guide |
+| `Sources/CosmicTile/Hotkeys.swift` | Global and temporary mode hotkeys |
+
+See [CHANGELOG.md](CHANGELOG.md), [CONTRIBUTING.md](CONTRIBUTING.md), [release verification](docs/VALIDATION.md), and [roadmap](docs/ROADMAP.md). The Windows counterpart is [WindowsCosmiTile](https://github.com/hckmseduardo/WindowsCosmiTile).
