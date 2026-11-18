@@ -21,7 +21,11 @@ import AppKit
         guard isViewLoaded else { return }
         for child in stack.arrangedSubviews { stack.removeArrangedSubview(child); child.removeFromSuperview() }
         let header = NSStackView(); header.orientation = .horizontal; header.spacing = 12
-        let title = label("▦  CosmicTile  ·  \(controller.monitorTiling.active.count)/\(controller.screens.count) telas", size: 15, bold: true)
+        let icon = NSImageView(image: BrandAssets.image("AppIcon") ?? NSImage())
+        icon.widthAnchor.constraint(equalToConstant: 24).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 24).isActive = true
+        header.addArrangedSubview(icon)
+        let title = label("CosmicTile  ·  \(controller.monitorTiling.active.count)/\(controller.screens.count) telas", size: 15, bold: true)
         header.addArrangedSubview(title)
         let spacer = NSView(); spacer.setContentHuggingPriority(.defaultLow, for: .horizontal); header.addArrangedSubview(spacer)
         let close = ActionButton("Fechar ×") { [weak self] in self?.dismiss?() }; close.bezelStyle = .inline

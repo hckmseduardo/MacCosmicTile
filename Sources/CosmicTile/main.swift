@@ -17,7 +17,11 @@ import Darwin
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.accessory)
         status = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
-        status.button?.title = "▦"
+        NSApp.applicationIconImage = BrandAssets.image("AppIcon")
+        status.button?.image = BrandAssets.statusImage()
+        status.button?.imagePosition = .imageLeading
+        status.button?.setAccessibilityLabel("CosmicTile")
+        status.button?.title = ""
         status.button?.toolTip = "CosmicTile · Control + Option + T para ativar"
         status.button?.target = self; status.button?.action = #selector(togglePopover)
         status.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
@@ -67,7 +71,7 @@ import Darwin
     }
     func updateStatus() {
         let active = controller.monitorTiling.active.count
-        status.button?.title = controller.resizeMode ? "▦ ↔" : active > 0 ? "▦ \(active)/\(controller.screens.count)" : "▦"
+        status.button?.title = controller.resizeMode ? " ↔" : active > 0 ? " \(active)/\(controller.screens.count)" : ""
         status.button?.toolTip = "CosmicTile · \(active) monitores com tiling · Control + Option + T alterna a tela focada"
     }
     func showPreferences() {
@@ -128,6 +132,15 @@ import Darwin
 if CommandLine.arguments.contains("--diagnose") {
     print("CosmicTile: accessibility=\(AXIsProcessTrusted()), monitors=\(NSScreen.screens.count)")
     exit(0)
+}
+if CommandLine.arguments.contains("--verify-brand") {
+    guard Bundle.main.url(forResource: "CosmicTile", withExtension: "icns") != nil,
+          Bundle.main.url(forResource: "AppIcon", withExtension: "png") != nil,
+          let appIcon = BrandAssets.image("AppIcon"), appIcon.isValid,
+          let menuIcon = BrandAssets.statusImage(), menuIcon.isTemplate, menuIcon.isValid else {
+        print("Missing or invalid packaged CosmicTile artwork"); exit(1)
+    }
+    print("Verified CosmicTile application icon, ICNS resource and menu-bar template"); exit(0)
 }
 let app = NSApplication.shared
 let delegate = AppDelegate()

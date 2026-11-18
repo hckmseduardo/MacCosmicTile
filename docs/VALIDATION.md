@@ -20,3 +20,7 @@ On the development setup the primary usable frame reserves a 30 pt top menu bar;
 ## Remaining manual checks
 
 Validate enabled/disabled monitors independently using actual application windows, resize mode registration and cleanup, outline following focus, apps with restrictive minimum sizes, display disconnect/reconnect, Spaces, auto-hidden menu bars, and restoration. Replacing an ad-hoc signed bundle can require renewed Accessibility permission. Do not treat the automated geometry tests as end-to-end validation of these scenarios.
+
+## v0.3.1 branding
+
+The packaged app verifies its ICNS, application PNG and menu-bar template with `--verify-brand`. The shared application artwork is byte-identical to the Windows repository copy. The 27 layout tests passed after resource integration. A live visual check of this update could not be completed while the development Mac was locked; existing screenshots show the previous interface header.

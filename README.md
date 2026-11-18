@@ -1,19 +1,21 @@
 <div align="center">
 
-# ▦ MacCosmicTile
+<img src="assets/brand/app-icon.png" width="96" alt="CosmicTile app icon">
+
+# CosmicTile for macOS
 
 **Cada tela, seu ritmo.**
 
 A native Swift window manager for macOS, inspired by COSMIC.<br>
 Independent tiling per monitor · Active-window highlight · Keyboard resizing
 
-[Download for Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/latest) · [Português](docs/README.pt-BR.md) · [Keyboard shortcuts](#keyboard-shortcuts) · [Report a bug](https://github.com/hckmseduardo/MacCosmicTile/issues/new?template=bug_report.md)
+[Download for Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.3.1) · [Português](docs/README.pt-BR.md) · [Keyboard shortcuts](#keyboard-shortcuts) · [Report a bug](https://github.com/hckmseduardo/MacCosmicTile/issues/new?template=bug_report.md)
 
 </div>
 
 ![CosmicTile native settings: independent monitor switches, active-window highlight colors and border thickness](docs/images/settings.png)
 
-> **Early preview · v0.3.0.** This is an independent project, not affiliated with System76. The screenshot shows the actual native settings window; its small layout preview is illustrative, not a capture of managed application windows.
+> **Early preview · v0.3.1.** This is an independent project, not affiliated with System76. The screenshot shows the actual native settings window; its small layout preview is illustrative, not a capture of managed application windows.
 
 ## What it does
 
@@ -30,7 +32,7 @@ Independent tiling per monitor · Active-window highlight · Keyboard resizing
 
 ### Download the app
 
-1. Open [Releases](https://github.com/hckmseduardo/MacCosmicTile/releases/latest) and download the **macOS arm64** ZIP.
+1. Open [Releases](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.3.1) and download the **macOS arm64** ZIP.
 2. Extract it and move `CosmicTile.app` into **Applications**.
 3. Open the app. Look for **▦** in the menu bar. Tiling starts **off**.
 4. Open **Ajustes, cores e guia de atalhos…** and grant Accessibility access as described below.
@@ -181,3 +183,7 @@ The project has **27 unit tests** for placement, insertion, split geometry, nega
 | `Sources/CosmicTile/Hotkeys.swift` | Global and temporary mode hotkeys |
 
 See [CHANGELOG.md](CHANGELOG.md), [CONTRIBUTING.md](CONTRIBUTING.md), [release verification](docs/VALIDATION.md), and [roadmap](docs/ROADMAP.md). The Windows counterpart is [WindowsCosmiTile](https://github.com/hckmseduardo/WindowsCosmiTile).
+
+## Shared identity
+
+CosmicTile uses the same application artwork on macOS and Windows. The macOS menu bar uses an OS-tinted template rendition; Windows embeds the color icon in the executable and notification-area icon. See the [brand guide](assets/brand/BRAND.md) and [identity board](assets/brand/brand-board.png).

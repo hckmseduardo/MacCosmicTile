@@ -2,7 +2,7 @@
 
 Gerenciador de janelas nativo em Swift, inspirado no COSMIC, com tiling independente por monitor e borda de foco.
 
-[Baixar para Mac Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/latest) · [README completo](../README.md)
+[Baixar para Mac Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.3.1) · [README completo](../README.md)
 
 ![Janela nativa de ajustes do CosmicTile](images/settings.png)
 

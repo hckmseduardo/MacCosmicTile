@@ -21,8 +21,13 @@ import TileCore
         let content = window.contentView!
         content.addSubview(root)
         NSLayoutConstraint.activate([root.leadingAnchor.constraint(equalTo: content.leadingAnchor, constant: 28), root.trailingAnchor.constraint(equalTo: content.trailingAnchor, constant: -28), root.topAnchor.constraint(equalTo: content.topAnchor, constant: 24)])
-        let brand = label("▦   COSMICTILE", size: 13, weight: .bold, color: .systemCyan)
+        let brand = label("CosmicTile", size: 16, weight: .bold, color: .systemCyan)
         let brandRow = NSStackView(); brandRow.orientation = .horizontal
+        let icon = NSImageView(image: BrandAssets.image("AppIcon") ?? NSImage())
+        icon.imageScaling = .scaleProportionallyDown
+        icon.widthAnchor.constraint(equalToConstant: 28).isActive = true
+        icon.heightAnchor.constraint(equalToConstant: 28).isActive = true
+        brandRow.spacing = 10; brandRow.addArrangedSubview(icon)
         brandRow.addArrangedSubview(brand)
         let space = NSView(); space.setContentHuggingPriority(.defaultLow, for: .horizontal); brandRow.addArrangedSubview(space)
         let quick = ActionButton("Controles rápidos ▾") { [weak self] in self?.openQuickControls?() }; quick.bezelStyle = .rounded
@@ -36,7 +41,7 @@ import TileCore
         root.addArrangedSubview(body)
         body.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
         let footer = NSStackView(); footer.orientation = .horizontal; footer.spacing = 12
-        footer.addArrangedSubview(label("v0.3.0 · Swift + AppKit · Inspirado no COSMIC", size: 11, color: .secondaryLabelColor))
+        footer.addArrangedSubview(label("v0.3.1 · Swift + AppKit · Inspirado no COSMIC", size: 11, color: .secondaryLabelColor))
         let github = ActionButton("GitHub ↗") { NSWorkspace.shared.open(URL(string: "https://github.com/hckmseduardo/MacCosmicTile")!) }
         github.bezelStyle = .inline; footer.addArrangedSubview(github)
         root.addArrangedSubview(footer)
