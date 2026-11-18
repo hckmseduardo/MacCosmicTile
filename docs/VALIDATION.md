@@ -23,4 +23,4 @@ Validate enabled/disabled monitors independently using actual application window
 
 ## v0.3.1 branding
 
-The packaged app verifies its ICNS, application PNG and menu-bar template with `--verify-brand`. The shared application artwork is byte-identical to the Windows repository copy. The 27 layout tests passed after resource integration. A live visual check of this update could not be completed while the development Mac was locked; existing screenshots show the previous interface header.
+The packaged app verifies its ICNS, application PNG and menu-bar template with `--verify-brand`. The shared application artwork is byte-identical to the Windows repository copy. The 27 layout tests passed after resource integration. After the Mac was unlocked, the running v0.3.1 settings and quick-controls windows were visually inspected: both display the shared CosmicTile icon. Documentation screenshots were refreshed, and Escape dismissal was rechecked.
