@@ -94,6 +94,10 @@ Open **Ajustes, cores e guia de atalhos… → Monitores e destaque**:
 
 The transparent border follows the focused tiled/floating managed window on a tiling-enabled monitor. It does not take keyboard focus or intercept clicks. It hides for unmanaged windows, disabled displays, or when tiling is off. Color, width, enabled state and gap size persist between launches.
 
+### Save and open dialogs stay floating
+
+Save/Open panels, modal dialogs, attached sheets, floating utility windows and nonresizable auxiliary windows are excluded from tiling. Eligibility uses Accessibility role, subrole, modal state and resize capability, rather than localized window titles. Main document windows remain tiled. Applications with incorrect Accessibility metadata can still require manual floating.
+
 ### Resize a window
 
 1. Focus the window.
@@ -162,7 +166,7 @@ A diagnostic launched from a terminal may have a different Accessibility permiss
 
 ## Development and validation
 
-The project has **22 unit tests** for placement, insertion, split geometry, negative coordinates, swaps, resizing, rotation, independent monitor state, display removal, restoration clamping and outline coordinate conversion. The native settings and shortcut views were inspected and captured on macOS. App-specific Accessibility behavior and full multi-monitor operation still require real-world validation; unit tests are not a substitute for it.
+The project has **27 unit tests** for placement, insertion, split geometry, negative coordinates, swaps, resizing, rotation, independent monitor state, display removal, restoration clamping and outline coordinate conversion. The native settings and shortcut views were inspected and captured on macOS. App-specific Accessibility behavior and full multi-monitor operation still require real-world validation; unit tests are not a substitute for it.
 
 | Source | Responsibility |
 | --- | --- |

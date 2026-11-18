@@ -58,4 +58,4 @@ open dist/CosmicTile.app
 
 ## Estado atual
 
-Versão inicial: ainda não tem pilhas com abas, arraste com prévia, regras por aplicativo nem layouts persistentes por Space. Aplicativos podem impor tamanhos mínimos e recusar ajustes; por isso, sobreposição em cenários apertados ainda é possível. Há 22 testes automatizados do motor e geometria. A interface foi inspecionada em execução, mas o comportamento com todos os aplicativos e combinações de monitores ainda precisa de validação.
+Versão inicial: ainda não tem pilhas com abas, arraste com prévia, regras por aplicativo nem layouts persistentes por Space. Aplicativos podem impor tamanhos mínimos e recusar ajustes; por isso, sobreposição em cenários apertados ainda é possível. Há 27 testes automatizados do motor e geometria. A interface foi inspecionada em execução, mas o comportamento com todos os aplicativos e combinações de monitores ainda precisa de validação.

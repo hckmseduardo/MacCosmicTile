@@ -1,5 +1,6 @@
 import AppKit
 import ApplicationServices
+import TileCore
 
 struct ManagedWindow {
     let id: Int
@@ -26,7 +27,12 @@ struct ManagedWindow {
             AXUIElementSetMessagingTimeout(root, 0.15)
             guard let elements = value(root, kAXWindowsAttribute) as? [AXUIElement] else { return [ManagedWindow]() }
             return elements.compactMap { element in
-                guard value(element, kAXSubroleAttribute) as? String == kAXStandardWindowSubrole,
+                var resizable = DarwinBoolean(false)
+                _ = AXUIElementIsAttributeSettable(element, kAXSizeAttribute as CFString, &resizable)
+                guard WindowPolicy.allows(role: value(element, kAXRoleAttribute) as? String ?? "",
+                                          subrole: value(element, kAXSubroleAttribute) as? String ?? "",
+                                          modal: value(element, kAXModalAttribute) as? Bool ?? false,
+                                          resizable: resizable.boolValue),
                       value(element, kAXMinimizedAttribute) as? Bool != true,
                       value(element, "AXFullScreen") as? Bool != true,
                       let rect = frame(element),

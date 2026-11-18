@@ -16,11 +16,12 @@
 - Transfers to a disabled monitor leave the window floating.
 - Clamp restored frames to the connected monitor's usable bounds.
 - Replace the blocking native status menu with a transient popover, outside-click dismissal, explicit close button and Escape handling.
+- Exclude modal save/open panels, sheets, dialogs, utility windows and nonresizable auxiliary windows using Accessibility metadata.
 - Preserve the selected window for commands invoked from quick controls.
 
 ### Documentation
 - Expanded English README and Portuguese guide with installation, Accessibility, per-monitor workflows, active hints, shortcuts, troubleshooting and current limits.
-- Added release validation notes and 7 monitor/geometry regression tests (22 tests total).
+- Added release validation notes and 7 monitor/geometry and 5 window-eligibility regression tests (27 tests total).
 
 ## 0.2.0
 

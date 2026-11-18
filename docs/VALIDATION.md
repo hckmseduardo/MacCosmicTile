@@ -2,7 +2,7 @@
 
 ## Automated
 
-- `swift test`: 22 tests, zero failures.
+- `swift test`: 27 tests, zero failures.
 - `./build-app.sh`: release bundle built on Apple Silicon, Swift 6.2.3 / Xcode 26.2.
 - `codesign --verify --strict dist/CosmicTile.app`: verify local ad-hoc signature.
 - `plutil -lint dist/CosmicTile.app/Contents/Info.plist`: verify bundle metadata.
