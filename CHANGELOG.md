@@ -6,6 +6,7 @@
 - Apply the shared CosmicTile icon to the app bundle, Finder, native settings and quick controls.
 - Replace the placeholder menu-bar character with an OS-tinted template of the shared three-window mark.
 - Include canonical brand artwork and a packaged-resource verification command.
+- Sign in clean staging and create the distribution ZIP before file-provider metadata can be attached.
 
 ## 0.3.0
 

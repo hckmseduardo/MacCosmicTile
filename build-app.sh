@@ -2,7 +2,9 @@
 set -euo pipefail
 cd "${0:A:h}"
 swift build -c release
-bundle="${COSMICTILE_BUILD_DIR:-dist}/CosmicTile.app"
+output_bundle="${COSMICTILE_BUILD_DIR:-dist}/CosmicTile.app"
+# A non-synced staging directory keeps Finder/file-provider metadata out of signing.
+bundle=".build/app-package.nosync/CosmicTile.app"
 mkdir -p "$bundle/Contents/MacOS" "$bundle/Contents/Resources"
 cp Sources/CosmicTile/Resources/* "$bundle/Contents/Resources/"
 cp .build/release/CosmicTile "$bundle/Contents/MacOS/CosmicTile"
@@ -25,4 +27,9 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 PLIST
 xattr -cr "$bundle"
 codesign --force --sign - "$bundle"
-echo "Built app: $bundle"
+codesign --verify --strict "$bundle"
+mkdir -p "${output_bundle:h}"
+ditto -c -k --keepParent --norsrc "$bundle" "${output_bundle%.app}.zip"
+ditto --noextattr "$bundle" "$output_bundle"
+echo "Built app: $output_bundle"
+echo "Clean distribution archive: ${output_bundle%.app}.zip"
