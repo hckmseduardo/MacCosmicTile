@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.4.0
+
+### Updates
+- Detect compatible newer GitHub releases, including current preview releases.
+- Add manual update checks and persistent daily/startup automatic-check controls.
+- Show version, notes and download size with explicit Download ZIP / Later / Release notes choices.
+- Download only after approval; verify architecture, repository HTTPS URL, expected byte length and GitHub SHA-256 digest.
+- Stream bounded responses, remove partial files and avoid overwriting existing downloads.
+- Reveal the verified ZIP for manual installation; never extract, execute or replace the running app.
+- Add selection, consent single-flight and integrity regression tests, plus metadata-only diagnostic.
+
 ## 0.3.1
 
 ### Branding

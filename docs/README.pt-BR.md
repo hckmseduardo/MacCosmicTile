@@ -2,7 +2,7 @@
 
 Gerenciador de janelas nativo em Swift, inspirado no COSMIC, com tiling independente por monitor e borda de foco.
 
-[Baixar para Mac Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.3.1) · [README completo](../README.md)
+[Baixar para Mac Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.4.0) · [README completo](../README.md)
 
 ![Janela nativa de ajustes do CosmicTile](images/settings.png)
 
@@ -58,4 +58,8 @@ open dist/CosmicTile.app
 
 ## Estado atual
 
-Versão inicial: ainda não tem pilhas com abas, arraste com prévia, regras por aplicativo nem layouts persistentes por Space. Aplicativos podem impor tamanhos mínimos e recusar ajustes; por isso, sobreposição em cenários apertados ainda é possível. Há 27 testes automatizados do motor e geometria. A interface foi inspecionada em execução, mas o comportamento com todos os aplicativos e combinações de monitores ainda precisa de validação.
+Versão inicial: ainda não tem pilhas com abas, arraste com prévia, regras por aplicativo nem layouts persistentes por Space. Aplicativos podem impor tamanhos mínimos e recusar ajustes; por isso, sobreposição em cenários apertados ainda é possível. Há 35 testes automatizados do motor e geometria. A interface foi inspecionada em execução, mas o comportamento com todos os aplicativos e combinações de monitores ainda precisa de validação.
+
+## Atualizações
+
+No painel rápido, **Check for updates…** consulta novas versões no GitHub. A consulta automática ocorre ao iniciar e no máximo diariamente. O download só começa após escolher **Download ZIP**; **Later** adia e **Release notes** abre as notas sem baixar. O ZIP é verificado e salvo em Downloads/CosmicTile Updates. A instalação continua manual.

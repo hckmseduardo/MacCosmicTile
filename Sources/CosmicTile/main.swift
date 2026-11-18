@@ -4,6 +4,7 @@ import Darwin
 
 @MainActor final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     let controller = Controller()
+    let updater = Updater()
     let hotkeys = Hotkeys()
     var status: NSStatusItem!
     var resizeHint: NSPanel?
@@ -25,7 +26,19 @@ import Darwin
         status.button?.toolTip = "CosmicTile · Control + Option + T para ativar"
         status.button?.target = self; status.button?.action = #selector(togglePopover)
         status.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
-        quickControls = QuickControls(controller: controller)
+        quickControls = QuickControls(controller: controller, updater: updater)
+        quickControls.checkForUpdates = { [weak self] in
+            self?.popover.performClose(nil); self?.updater.check(manual: true)
+        }
+        updater.beforePrompt = { [weak self] in
+            guard let controller = self?.controller, controller.resizeMode else { return }
+            controller.resizeMode = false; controller.onResizeMode?(false)
+        }
+        updater.onChange = { [weak self] in
+            guard let self else { return }
+            if popover.isShown { quickControls.refresh() }
+        }
+        updater.start()
         quickControls.dismiss = { [weak self] in self?.popover.performClose(nil) }
         quickControls.settings = { [weak self] in self?.showPreferences() }
         quickControls.executeWindowCommand = { [weak self] operation in
@@ -141,6 +154,18 @@ if CommandLine.arguments.contains("--verify-brand") {
         print("Missing or invalid packaged CosmicTile artwork"); exit(1)
     }
     print("Verified CosmicTile application icon, ICNS resource and menu-bar template"); exit(0)
+}
+if CommandLine.arguments.contains("--check-updates") {
+    let currentIndex = CommandLine.arguments.firstIndex(of: "--current-version")
+    let current = currentIndex.flatMap { CommandLine.arguments.indices.contains($0 + 1) ? CommandLine.arguments[$0 + 1] : nil } ?? Updater.currentVersion
+    Task {
+        do {
+            let candidate = try await UpdateService().check(current: current)
+            print(candidate.map { "Available: \($0.tag) · \($0.fileName) · SHA-256 \($0.sha256)" } ?? "No newer compatible release")
+            exit(0)
+        } catch { print("Update check failed: \(error.localizedDescription)"); exit(1) }
+    }
+    RunLoop.main.run()
 }
 let app = NSApplication.shared
 let delegate = AppDelegate()

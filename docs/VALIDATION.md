@@ -24,3 +24,11 @@ Validate enabled/disabled monitors independently using actual application window
 ## v0.3.1 branding
 
 The packaged app verifies its ICNS, application PNG and menu-bar template with `--verify-brand`. The shared application artwork is byte-identical to the Windows repository copy. The 27 layout tests passed after resource integration. After the Mac was unlocked, the running v0.3.1 settings and quick-controls windows were visually inspected: both display the shared CosmicTile icon. Documentation screenshots were refreshed, and Escape dismissal was rechecked.
+
+## v0.4.0 GitHub updates
+
+- `swift test`: 36 tests passed, including version ordering, architecture selection, consent state, asset URL policy, bounded notes and SHA-256 validation.
+- Release bundle built successfully; packaged branding verification passed.
+- A metadata-only query against the public GitHub API selected the published v0.3.1 arm64 package when testing with current version 0.1.0.
+- The running v0.4.0 app displayed the new controls. A manual check returned the native “No compatible update found” dialog and dismissed correctly. Automatic checks were left enabled.
+- No live package download was authorized during UI validation. Download consent and integrity behavior were covered by automated tests; installation remains manual.

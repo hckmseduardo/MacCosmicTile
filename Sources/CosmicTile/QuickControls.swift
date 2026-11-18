@@ -3,11 +3,13 @@ import AppKit
 /// A transient popover avoids entering NSMenu's blocking tracking loop.
 @MainActor final class QuickControls: NSViewController {
     let controller: Controller
+    let updater: Updater
+    var checkForUpdates: (() -> Void)?
     var dismiss: (() -> Void)?
     var settings: (() -> Void)?
     var executeWindowCommand: ((() -> Void) -> Void)?
     private let stack = NSStackView()
-    init(controller: Controller) { self.controller = controller; super.init(nibName: nil, bundle: nil) }
+    init(controller: Controller, updater: Updater) { self.controller = controller; self.updater = updater; super.init(nibName: nil, bundle: nil) }
     required init?(coder: NSCoder) { nil }
     override func loadView() {
         view = PreferencesBackground(frame: NSRect(x: 0, y: 0, width: 430, height: 680))
@@ -71,6 +73,12 @@ import AppKit
         }
         if controller.failures > 0 { add(label("\(controller.failures) janelas recusaram ajuste", size: 11)) }
         add(label("Esc ou clique fora para fechar.\n⌃ Control  ·  ⌥ Option  ·  ⇧ Shift", size: 11))
+        separator()
+        button(updater.status) { [weak self] in self?.checkForUpdates?() }
+        let autoUpdates = ActionButton("Automatically check for updates") { [weak self] in
+            guard let self else { return }; updater.automaticChecks.toggle(); refresh()
+        }
+        autoUpdates.setButtonType(.switch); autoUpdates.state = updater.automaticChecks ? .on : .off; add(autoUpdates)
         button("Sair e restaurar posições") { NSApp.terminate(nil) }
         view.layoutSubtreeIfNeeded()
         preferredContentSize = NSSize(width: 430, height: stack.fittingSize.height + 36)
