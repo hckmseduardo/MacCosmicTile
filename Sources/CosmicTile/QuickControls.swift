@@ -4,6 +4,7 @@ import AppKit
 @MainActor final class QuickControls: NSViewController {
     let controller: Controller
     let updater: Updater
+    let keepAwake = KeepAwake()
     var checkForUpdates: (() -> Void)?
     var dismiss: (() -> Void)?
     var settings: (() -> Void)?
@@ -79,6 +80,13 @@ import AppKit
             guard let self else { return }; updater.automaticChecks.toggle(); refresh()
         }
         autoUpdates.setButtonType(.switch); autoUpdates.state = updater.automaticChecks ? .on : .off; add(autoUpdates)
+        let awake = ActionButton("Keep awake") { [weak self] in
+            guard let self else { return }
+            do { try keepAwake.setEnabled(!keepAwake.enabled) }
+            catch { NSAlert(error: error).runModal() }
+            refresh()
+        }
+        awake.setButtonType(.switch); awake.state = keepAwake.enabled ? .on : .off; add(awake)
         button("Sair e restaurar posições") { NSApp.terminate(nil) }
         view.layoutSubtreeIfNeeded()
         preferredContentSize = NSSize(width: 430, height: stack.fittingSize.height + 36)

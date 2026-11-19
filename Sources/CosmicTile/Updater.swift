@@ -2,7 +2,7 @@ import AppKit
 import TileCore
 
 @MainActor final class Updater {
-    static var currentVersion: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.0" }
+    static var currentVersion: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.1" }
     private let service = UpdateService()
     private var flow = UpdateFlow()
     private var timer: Timer?

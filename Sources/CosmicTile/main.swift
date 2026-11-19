@@ -140,7 +140,7 @@ import Darwin
         popoverKeyMonitor = nil; commandTarget = nil; controller.commandWindow = nil
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { showPreferences(); return true }
-    func applicationWillTerminate(_ notification: Notification) { controller.stop() }
+    func applicationWillTerminate(_ notification: Notification) { try? quickControls.keepAwake.setEnabled(false); controller.stop() }
 }
 if CommandLine.arguments.contains("--diagnose") {
     print("CosmicTile: accessibility=\(AXIsProcessTrusted()), monitors=\(NSScreen.screens.count)")

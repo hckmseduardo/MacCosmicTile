@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.4.1 — 2026-11-18
+
+- Add a session-only Keep awake menu toggle backed by native power management, with release on disable or exit.
+
 ## 0.4.0
 
 ### Updates

@@ -18,8 +18,8 @@ cat > "$bundle/Contents/Info.plist" <<'PLIST'
 <key>CFBundleIconFile</key><string>CosmicTile.icns</string>
 <key>CFBundleDisplayName</key><string>CosmicTile</string>
 <key>CFBundlePackageType</key><string>APPL</string>
-<key>CFBundleShortVersionString</key><string>0.4.0</string>
-<key>CFBundleVersion</key><string>5</string>
+<key>CFBundleShortVersionString</key><string>0.4.1</string>
+<key>CFBundleVersion</key><string>6</string>
 <key>LSMinimumSystemVersion</key><string>14.0</string>
 <key>LSUIElement</key><true/>
 <key>NSHighResolutionCapable</key><true/>
