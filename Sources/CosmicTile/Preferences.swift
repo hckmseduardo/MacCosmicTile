@@ -42,6 +42,12 @@ import TileCore
         body.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
         let footer = NSStackView(); footer.orientation = .horizontal; footer.spacing = 12
         footer.addArrangedSubview(label("v0.4.1 · Swift + AppKit · Inspirado no COSMIC", size: 11, color: .secondaryLabelColor))
+        let website = ActionButton("Site oficial ↗") {
+            if let url = URL(string: "https://cosmictile.app.amazing-ai.tools") {
+                NSWorkspace.shared.open(url)
+            }
+        }
+        website.bezelStyle = .inline; footer.addArrangedSubview(website)
         let github = ActionButton("GitHub ↗") { NSWorkspace.shared.open(URL(string: "https://github.com/hckmseduardo/MacCosmicTile")!) }
         github.bezelStyle = .inline; footer.addArrangedSubview(github)
         root.addArrangedSubview(footer)

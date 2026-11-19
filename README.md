@@ -9,7 +9,7 @@
 A native Swift window manager for macOS, inspired by COSMIC.<br>
 Independent tiling per monitor · Active-window highlight · Keyboard resizing
 
-[Download for Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.4.0) · [Português](docs/README.pt-BR.md) · [Keyboard shortcuts](#keyboard-shortcuts) · [Report a bug](https://github.com/hckmseduardo/MacCosmicTile/issues/new?template=bug_report.md)
+[Official website](https://cosmictile.app.amazing-ai.tools) · [Download for Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.4.0) · [Português](docs/README.pt-BR.md) · [Keyboard shortcuts](#keyboard-shortcuts) · [Report a bug](https://github.com/hckmseduardo/MacCosmicTile/issues/new?template=bug_report.md)
 
 </div>
 
