@@ -18,6 +18,10 @@ A pequena prévia de layout dentro dos ajustes é ilustrativa. As screenshots mo
 
 A build é assinada localmente, sem notarização Apple. O macOS pode exigir **Abrir Mesmo Assim**, em Privacidade e Segurança, na primeira execução. Não é necessário desativar Gatekeeper nem SIP. Após uma atualização, pode ser necessário remover e adicionar novamente a autorização de Acessibilidade.
 
+## Abrir ao iniciar sessão
+
+Em **Ajustes → Geral**, ative **Abrir ao iniciar sessão** para que o CosmicTile apareça na barra de menus ao entrar na sua conta. Se o macOS pedir autorização, clique em **Abrir Itens de Início…** e permita a abertura nos Ajustes do Sistema. Para desativar, desmarque a mesma opção.
+
 ## Monitores independentes
 
 **Control + Option + T** alterna o monitor da janela focada; sem uma janela disponível, usa a tela sob o ponteiro. **Control + Option + Shift + T** alterna todos. Desativar um monitor restaura as posições das janelas dele e mantém os outros como estavam. Novos monitores iniciam desativados.

@@ -3,6 +3,25 @@ import XCTest
 @testable import CosmicTile
 
 @MainActor final class UpdateInstallerTests: XCTestCase {
+    func testBeginCreatesPrivateStagingDirectory() throws {
+        let (installer, _) = try fixture(createStaging: false)
+        defer { cleanUp(installer) }
+
+        try installer.begin()
+
+        let attributes = try FileManager.default.attributesOfItem(atPath: installer.workDirectory.path)
+        XCTAssertEqual(attributes[.posixPermissions] as? Int, 0o700)
+    }
+
+    func testSecondAttemptPreservesPendingUpdate() throws {
+        let (installer, _) = try fixture()
+        defer { cleanUp(installer) }
+
+        XCTAssertThrowsError(try installer.begin())
+
+        XCTAssertTrue(FileManager.default.fileExists(atPath: installer.archive.path))
+    }
+
     func testHelperWaitsThenReplacesAndRelaunchesRenamedBundle() async throws {
         let (installer, version) = try fixture()
         defer { cleanUp(installer) }
@@ -58,7 +77,7 @@ import XCTest
         XCTAssertEqual(try versionAt(installer.installed), "0.4.1")
     }
 
-    private func fixture() throws -> (UpdateInstaller, String) {
+    private func fixture(createStaging: Bool = true) throws -> (UpdateInstaller, String) {
         guard let path = ProcessInfo.processInfo.environment["COSMICTILE_TEST_APP"] else {
             throw XCTSkip("Set COSMICTILE_TEST_APP to the signed bundle built by build-app.sh")
         }
@@ -74,8 +93,10 @@ import XCTest
             let plist = installer.installed.appendingPathComponent("Contents/Info.plist")
             try run("/usr/libexec/PlistBuddy", ["-c", "Set :CFBundleShortVersionString 0.4.1", plist.path])
             try run("/usr/bin/codesign", ["--force", "--sign", "-", installer.installed.path])
-            try installer.begin()
-            try FileManager.default.copyItem(at: app.deletingPathExtension().appendingPathExtension("zip"), to: installer.archive)
+            if createStaging {
+                try installer.begin()
+                try FileManager.default.copyItem(at: app.deletingPathExtension().appendingPathExtension("zip"), to: installer.archive)
+            }
             return (installer, version)
         } catch {
             try? FileManager.default.removeItem(at: directory)

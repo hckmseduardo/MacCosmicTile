@@ -72,6 +72,10 @@ Keep the app in one stable location. Rebuilding or replacing a locally signed ap
 
 ## Everyday use
 
+### Open at login
+
+In **Ajustes → Geral**, turn on **Abrir ao iniciar sessão** to open CosmicTile in the menu bar when you sign in. If macOS asks for approval, use **Abrir Itens de Início…** to approve it in System Settings. Turn off the same option to stop opening CosmicTile at login.
+
 ### Choose which monitors tile
 
 Click **▦** to open the quick controls. Switch individual monitors on/off by name, or open the settings window for the same switches. The status icon shows the number of active displays, for example **▦ 1/2**.

@@ -28,16 +28,16 @@ struct UpdateInstaller: Sendable {
               volume?.volumeSupportsSwapRenaming != false, let identity = installedBundleIdentity else {
             throw InstallFailure.unsupportedLocation
         }
+        guard mkdir(workDirectory.path, 0o700) == 0 else {
+            let reason = errno
+            if reason == EEXIST { throw InstallFailure.pending(workDirectory.path) }
+            throw InstallFailure.unsupportedLocation
+        }
         do {
             try Data(identity.utf8).write(to: identityFile, options: .withoutOverwriting)
         } catch {
             cleanUp()
             throw error
-        }
-        guard mkdir(workDirectory.path, 0o700) == 0 else {
-            let reason = errno
-            if reason == EEXIST { throw InstallFailure.pending(workDirectory.path) }
-            throw InstallFailure.unsupportedLocation
         }
     }
 

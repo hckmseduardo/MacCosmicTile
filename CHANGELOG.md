@@ -4,6 +4,7 @@
 
 - Install approved updates in place and reopen CosmicTile automatically.
 - Restore the previous version when the replacement fails to start.
+- Add an opt-in launch at login setting.
 - Link to the official website from Settings.
 
 ## 0.4.1 — 2026-11-18
