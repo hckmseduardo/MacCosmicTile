@@ -2,11 +2,12 @@ import AppKit
 import TileCore
 
 @MainActor final class Updater {
-    static var currentVersion: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.1" }
+    static var currentVersion: String { Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "0.4.2" }
     private let service = UpdateService()
     private var flow = UpdateFlow()
     private var timer: Timer?
     private var candidate: UpdateCandidate?
+    private var installation: Task<Void, Never>?
     var onChange: (() -> Void)?
     var beforePrompt: (() -> Void)?
     var automaticChecks: Bool {
@@ -14,7 +15,7 @@ import TileCore
         set { UserDefaults.standard.set(newValue, forKey: "updates.automatic"); onChange?() }
     }
     var status: String {
-        if flow.isDownloading { return "Downloading update…" }
+        if flow.isDownloading { return "Preparing update…" }
         if flow.isChecking { return "Checking for updates…" }
         if let candidate { return "Update available: \(candidate.tag)…" }
         return "Check for updates…"
@@ -55,13 +56,23 @@ import TileCore
             }
         }
     }
+    func prepareToQuit() -> NSApplication.TerminateReply {
+        guard let installation else { return .terminateNow }
+        installation.cancel()
+        Task {
+            await installation.value
+            NSApp.reply(toApplicationShouldTerminate: true)
+        }
+        return .terminateLater
+    }
+
     private func offer(_ candidate: UpdateCandidate) {
         beforePrompt?()
         let alert = NSAlert()
         alert.messageText = "CosmicTile \(candidate.tag) is available"
         let megabytes = String(format: "%.1f", Double(candidate.size) / 1_048_576)
-        alert.informativeText = "Installed: \(Self.currentVersion) · Download: \(megabytes) MB\n\n\(UpdateNotes.summary(candidate.notes))\n\nDownload the verified ZIP to Downloads? Installation is manual."
-        alert.addButton(withTitle: "Download ZIP")
+        alert.informativeText = "Installed: \(Self.currentVersion) · Download: \(megabytes) MB\n\n\(UpdateNotes.summary(candidate.notes))\n\nCosmicTile will verify the download, install it in the same location and reopen."
+        alert.addButton(withTitle: "Install and Restart")
         alert.addButton(withTitle: "Later")
         alert.addButton(withTitle: "Release notes")
         alert.buttons[0].keyEquivalent = ""
@@ -76,16 +87,29 @@ import TileCore
         }
         guard let authorized = flow.respond(approved: true) else { return }
         onChange?()
-        Task { [weak self] in
+        installation = Task { [weak self] in
             guard let self else { return }
+            let installer = UpdateInstaller(installed: Bundle.main.bundleURL)
             do {
-                let file = try await service.download(authorized)
-                flow.finish(); onChange?()
-                NSWorkspace.shared.activateFileViewerSelecting([file])
-                showMessage("Update downloaded and verified", "Saved to \(file.path).\n\nQuit CosmicTile, extract the ZIP and replace the app in Applications to install it. The running app has not been changed.")
+                try installer.begin()
+                do {
+                    try await service.download(authorized, to: installer.archive)
+                    try Task.checkCancellation()
+                    try await Task.detached(priority: .userInitiated) {
+                        try installer.prepare(for: authorized.tag)
+                    }.value
+                    try Task.checkCancellation()
+                    try installer.startHelper(waitingFor: ProcessInfo.processInfo.processIdentifier)
+                } catch {
+                    installer.cleanUp()
+                    throw error
+                }
+                installation = nil
+                NSApp.terminate(nil)
             } catch {
+                installation = nil
                 flow.finish(); onChange?()
-                showMessage("Update download failed", error.localizedDescription)
+                if !Task.isCancelled { showMessage("Could not install the update", error.localizedDescription) }
             }
         }
     }

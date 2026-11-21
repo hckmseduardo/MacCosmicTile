@@ -2,7 +2,7 @@
 
 Gerenciador de janelas nativo em Swift, inspirado no COSMIC, com tiling independente por monitor e borda de foco.
 
-[Site oficial](https://cosmictile.app.amazing-ai.tools) · [Baixar para Mac Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.4.0) · [README completo](../README.md)
+[Site oficial](https://cosmictile.app.amazing-ai.tools) · [Baixar para Mac Apple Silicon](https://cosmictile.app.amazing-ai.tools/#download) · [README completo](../README.md)
 
 ![Janela nativa de ajustes do CosmicTile](images/settings.png)
 
@@ -62,4 +62,6 @@ Versão inicial: ainda não tem pilhas com abas, arraste com prévia, regras por
 
 ## Atualizações
 
-No painel rápido, **Check for updates…** consulta novas versões no GitHub. A consulta automática ocorre ao iniciar e no máximo diariamente. O download só começa após escolher **Download ZIP**; **Later** adia e **Release notes** abre as notas sem baixar. O ZIP é verificado e salvo em Downloads/CosmicTile Updates. A instalação continua manual.
+No painel rápido, **Check for updates…** consulta novas versões no GitHub. A consulta automática ocorre ao iniciar e no máximo uma vez por dia. Ao escolher **Install and Restart**, o CosmicTile baixa e verifica a atualização, substitui o app no mesmo local e reabre. Se a nova versão falhar ao iniciar, a anterior é restaurada. **Later** adia a atualização e **Release notes** abre as notas.
+
+Quem usa a v0.4.1 ou anterior precisa fazer uma última instalação manual para receber o novo atualizador.

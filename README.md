@@ -9,13 +9,13 @@
 A native Swift window manager for macOS, inspired by COSMIC.<br>
 Independent tiling per monitor · Active-window highlight · Keyboard resizing
 
-[Official website](https://cosmictile.app.amazing-ai.tools) · [Download for Apple Silicon](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.4.0) · [Português](docs/README.pt-BR.md) · [Keyboard shortcuts](#keyboard-shortcuts) · [Report a bug](https://github.com/hckmseduardo/MacCosmicTile/issues/new?template=bug_report.md)
+[Official website](https://cosmictile.app.amazing-ai.tools) · [Download for Apple Silicon](https://cosmictile.app.amazing-ai.tools/#download) · [Português](docs/README.pt-BR.md) · [Keyboard shortcuts](#keyboard-shortcuts) · [Report a bug](https://github.com/hckmseduardo/MacCosmicTile/issues/new?template=bug_report.md)
 
 </div>
 
 ![CosmicTile native settings: independent monitor switches, active-window highlight colors and border thickness](docs/images/settings.png)
 
-> **Early preview · v0.4.0.** This is an independent project, not affiliated with System76. The screenshot shows the actual native settings window; its small layout preview is illustrative, not a capture of managed application windows.
+> **Early preview.** This is an independent project, not affiliated with System76. The screenshot shows the actual native settings window; its small layout preview is illustrative, not a capture of managed application windows.
 
 ## What it does
 
@@ -32,7 +32,7 @@ Independent tiling per monitor · Active-window highlight · Keyboard resizing
 
 ### Download the app
 
-1. Open [Releases](https://github.com/hckmseduardo/MacCosmicTile/releases/tag/v0.4.0) and download the **macOS arm64** ZIP.
+1. Open [Releases](https://github.com/hckmseduardo/MacCosmicTile/releases) and download the **macOS arm64** ZIP.
 2. Extract it and move `CosmicTile.app` into **Applications**.
 3. Open the app. Look for **▦** in the menu bar. Tiling starts **off**.
 4. Open **Ajustes, cores e guia de atalhos…** and grant Accessibility access as described below.
@@ -115,9 +115,9 @@ While resize mode is active, unmodified arrow keys are temporarily captured. The
 
 Use **Check for updates…** in the quick controls. Automatic checks run at startup and at most daily; use **Automatically check for updates** to turn them off. Compatible preview releases are included.
 
-A new version shows its release notes and download size. Choose **Download ZIP** to authorize the transfer, **Later** to defer it, or **Release notes** to open GitHub without downloading. Approved packages are size- and SHA-256-checked, saved in **Downloads → CosmicTile Updates**, and revealed in Finder. Installation remains manual: quit the app, extract the ZIP and replace it in Applications.
+A new version shows its release notes and download size. Choose **Install and Restart** to approve the update. CosmicTile verifies and extracts the download, replaces the app at its current location and reopens. If the new version fails to start, CosmicTile restores the previous version. **Later** defers the update and **Release notes** opens GitHub.
 
-No asset is downloaded before approval. The updater does not install or restart the app automatically. See [update behavior and trust policy](docs/UPDATES.md).
+Updating from v0.4.1 or earlier requires [one final manual installation](#install). See [update behavior and trust policy](docs/UPDATES.md).
 
 ## Keyboard shortcuts
 

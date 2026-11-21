@@ -1,0 +1,45 @@
+name: macOS build and updater tests
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  apple-silicon:
+    runs-on: macos-26
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Build and verify the signed app and archive
+        run: |
+          test "$(uname -m)" = arm64
+          swift --version
+          ./build-app.sh
+          codesign --verify --strict dist/CosmicTile.app
+          test "$(lipo -archs dist/CosmicTile.app/Contents/MacOS/CosmicTile)" = arm64
+          dist/CosmicTile.app/Contents/MacOS/CosmicTile --verify-brand
+      - name: Run native tests including in-place update and recovery
+        run: |
+          COSMICTILE_TEST_APP="$PWD/dist/CosmicTile.app" swift test
+      - name: Stage release archive and checksum
+        run: |
+          version="$(/usr/libexec/PlistBuddy -c 'Print :CFBundleShortVersionString' dist/CosmicTile.app/Contents/Info.plist)"
+          cd dist
+          archive="CosmicTile-v${version}-macOS-arm64.zip"
+          mv CosmicTile.zip "$archive"
+          shasum -a 256 "$archive" > "$archive.sha256"
+          shasum -a 256 -c "$archive.sha256"
+      - uses: actions/upload-artifact@v7
+        with:
+          name: cosmictile-macos-arm64
+          path: |
+            dist/CosmicTile-v*-macOS-arm64.zip
+            dist/CosmicTile-v*-macOS-arm64.zip.sha256
+          if-no-files-found: error
