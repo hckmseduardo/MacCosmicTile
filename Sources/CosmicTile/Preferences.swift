@@ -1,17 +1,27 @@
 import AppKit
+import ServiceManagement
 import TileCore
 
-@MainActor final class Preferences: NSObject {
+@MainActor final class Preferences: NSObject, NSWindowDelegate {
     let controller: Controller
     private(set) var window: NSWindow!
     var openQuickControls: (() -> Void)?
     private let body = NSStackView()
     private var tabs: NSSegmentedControl!
+    private let loginService = SMAppService.mainApp
+    private let loginItemToggle = NSButton(checkboxWithTitle: "Abrir ao iniciar sessão", target: nil, action: nil)
+    private let loginItemMessage = NSTextField(wrappingLabelWithString: "")
+    private let loginItemSettings = ActionButton("Abrir Itens de Início…") {
+        SMAppService.openSystemSettingsLoginItems()
+    }
+    private let loginItemControls = NSStackView()
+
     init(controller: Controller) {
         self.controller = controller
         super.init()
         window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 780, height: 840), styleMask: [.titled, .closable, .miniaturizable], backing: .buffered, defer: false)
         window.title = "CosmicTile · Ajustes"
+        window.delegate = self
         window.isReleasedWhenClosed = false
         window.appearance = NSAppearance(named: .darkAqua)
         window.backgroundColor = NSColor(srgbRed: 0.075, green: 0.085, blue: 0.11, alpha: 1)
@@ -35,16 +45,33 @@ import TileCore
         brandRow.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
         root.addArrangedSubview(label("Cada tela, seu ritmo.", size: 30, weight: .bold))
         root.addArrangedSubview(label("Tiling independente por monitor. Foco sempre à vista.", size: 14, color: .secondaryLabelColor))
-        tabs = NSSegmentedControl(labels: ["Monitores e destaque", "Atalhos de teclado"], trackingMode: .selectOne, target: self, action: #selector(tabChanged))
+        tabs = NSSegmentedControl(labels: ["Monitores e destaque", "Atalhos de teclado", "Geral"], trackingMode: .selectOne, target: self, action: #selector(tabChanged))
         tabs.selectedSegment = 0; root.addArrangedSubview(tabs)
         body.orientation = .vertical; body.alignment = .leading; body.spacing = 14
         root.addArrangedSubview(body)
         body.widthAnchor.constraint(equalTo: root.widthAnchor).isActive = true
         let footer = NSStackView(); footer.orientation = .horizontal; footer.spacing = 12
-        footer.addArrangedSubview(label("v0.4.1 · Swift + AppKit · Inspirado no COSMIC", size: 11, color: .secondaryLabelColor))
+        footer.addArrangedSubview(label("v\(Updater.currentVersion) · Swift + AppKit · Inspirado no COSMIC", size: 11, color: .secondaryLabelColor))
+        let website = ActionButton("Site oficial ↗") {
+            if let url = URL(string: "https://cosmictile.app.amazing-ai.tools") {
+                NSWorkspace.shared.open(url)
+            }
+        }
+        website.bezelStyle = .inline; footer.addArrangedSubview(website)
         let github = ActionButton("GitHub ↗") { NSWorkspace.shared.open(URL(string: "https://github.com/hckmseduardo/MacCosmicTile")!) }
         github.bezelStyle = .inline; footer.addArrangedSubview(github)
         root.addArrangedSubview(footer)
+        loginItemToggle.target = self
+        loginItemToggle.action = #selector(toggleLoginItem)
+        loginItemMessage.font = .systemFont(ofSize: 12)
+        loginItemMessage.textColor = .secondaryLabelColor
+        loginItemSettings.bezelStyle = .rounded
+        loginItemControls.orientation = .vertical
+        loginItemControls.alignment = .leading
+        loginItemControls.spacing = 10
+        loginItemControls.addArrangedSubview(loginItemToggle)
+        loginItemControls.addArrangedSubview(loginItemMessage)
+        loginItemControls.addArrangedSubview(loginItemSettings)
         refresh()
     }
     func show() { refresh(); window.center(); window.makeKeyAndOrderFront(nil); NSApp.activate() }
@@ -52,6 +79,12 @@ import TileCore
     func refresh() {
         for child in body.arrangedSubviews { body.removeArrangedSubview(child); child.removeFromSuperview() }
         if tabs.selectedSegment == 1 { buildShortcuts(); return }
+        if tabs.selectedSegment == 2 {
+            refreshLoginItem()
+            addCard("INÍCIO DE SESSÃO", subtitle: "O CosmicTile abre na barra de menus.",
+                    contents: [loginItemControls])
+            return
+        }
         let preview = LayoutPreview()
         preview.accent = controller.focusIndicator.accent.color
         preview.showHint = controller.focusIndicator.enabled
@@ -100,6 +133,44 @@ import TileCore
         permission.bezelStyle = .rounded
         body.addArrangedSubview(permission)
     }
+
+    func windowDidBecomeKey(_ notification: Notification) {
+        if tabs.selectedSegment == 2 { refreshLoginItem() }
+    }
+
+    @objc private func toggleLoginItem() {
+        let enabled = loginItemToggle.state == .on
+        do {
+            let status = loginService.status
+            if enabled && status == .notRegistered {
+                try loginService.register()
+            } else if !enabled && (status == .enabled || status == .requiresApproval) {
+                try loginService.unregister()
+            }
+        } catch {
+            refreshLoginItem()
+            if enabled && loginService.status == .requiresApproval { return }
+            let alert = NSAlert(error: error)
+            alert.messageText = "Não foi possível alterar a abertura ao iniciar sessão"
+            alert.beginSheetModal(for: window)
+            return
+        }
+        refreshLoginItem()
+    }
+
+    private func refreshLoginItem() {
+        let status = loginService.status
+        let pending = status == .requiresApproval
+        let available = status == .enabled || status == .notRegistered || pending
+        loginItemToggle.state = status == .enabled || pending ? .on : .off
+        loginItemToggle.isEnabled = available
+        loginItemMessage.stringValue = pending
+            ? "Permita a abertura automática nos Ajustes do Sistema."
+            : "O macOS não conseguiu localizar o item de início do CosmicTile."
+        loginItemMessage.isHidden = available && !pending
+        loginItemSettings.isHidden = !pending
+    }
+
     private func buildShortcuts() {
         let shortcuts = [
             ("⌃⌥ T / Y", "Ativar ou desativar o monitor da janela focada"),

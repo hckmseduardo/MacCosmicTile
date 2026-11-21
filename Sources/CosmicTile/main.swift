@@ -81,6 +81,7 @@ import Darwin
         updateStatus()
         if CommandLine.arguments.contains("--show-settings") { showPreferences() }
         if CommandLine.arguments.contains("--show-controls") { DispatchQueue.main.async { self.togglePopover() } }
+        DispatchQueue.main.async { UpdateInstaller.signalStartup() }
     }
     func updateStatus() {
         let active = controller.monitorTiling.active.count
@@ -140,7 +141,15 @@ import Darwin
         popoverKeyMonitor = nil; commandTarget = nil; controller.commandWindow = nil
     }
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool { showPreferences(); return true }
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply { updater.prepareToQuit() }
     func applicationWillTerminate(_ notification: Notification) { try? quickControls.keepAwake.setEnabled(false); controller.stop() }
+}
+if CommandLine.arguments.dropFirst().first == UpdateInstaller.helperArgument {
+    let helperApp = NSApplication.shared
+    helperApp.setActivationPolicy(.prohibited)
+    Task { exit(await UpdateInstaller.runHelper(arguments: CommandLine.arguments)) }
+    helperApp.run()
+    exit(1)
 }
 if CommandLine.arguments.contains("--diagnose") {
     print("CosmicTile: accessibility=\(AXIsProcessTrusted()), monitors=\(NSScreen.screens.count)")

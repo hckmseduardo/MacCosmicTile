@@ -19,7 +19,7 @@ struct UpdateService: Sendable {
     }
     private func request(_ url: URL) -> URLRequest {
         var request = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData)
-        request.setValue("CosmicTile/0.4.0 (macOS)", forHTTPHeaderField: "User-Agent")
+        request.setValue("CosmicTile (macOS)", forHTTPHeaderField: "User-Agent")
         return request
     }
     func check(current: String) async throws -> UpdateCandidate? {
@@ -41,17 +41,9 @@ struct UpdateService: Sendable {
         return ReleasePolicy.select(releases, current: current, architecture: Self.architecture)
     }
     /// Called only after UpdateFlow returns an explicitly authorized candidate.
-    func download(_ candidate: UpdateCandidate) async throws -> URL {
+    func download(_ candidate: UpdateCandidate, to target: URL) async throws {
         let manager = FileManager.default
-        guard let downloads = manager.urls(for: .downloadsDirectory, in: .userDomainMask).first else { throw UpdateFailure.noDownloadsDirectory }
-        let directory = downloads.appendingPathComponent("CosmicTile Updates", isDirectory: true)
-        try manager.createDirectory(at: directory, withIntermediateDirectories: true)
-        var target = directory.appendingPathComponent(candidate.fileName)
-        if manager.fileExists(atPath: target.path) {
-            if (try? UpdateIntegrity.verify(target, expectedSize: candidate.size, sha256: candidate.sha256)) != nil { return target }
-            target = directory.appendingPathComponent("\(target.deletingPathExtension().lastPathComponent)-\(UUID().uuidString.prefix(8)).zip")
-        }
-        let partial = directory.appendingPathComponent(".\(UUID().uuidString).part")
+        let partial = target.appendingPathExtension("part")
         defer { try? manager.removeItem(at: partial) }
         let session = makeSession(); defer { session.invalidateAndCancel() }
         var downloadRequest = request(candidate.url)
@@ -75,6 +67,5 @@ struct UpdateService: Sendable {
         try UpdateIntegrity.verify(partial, expectedSize: candidate.size, sha256: candidate.sha256)
         // moveItem fails rather than overwriting a destination created in the meantime.
         try manager.moveItem(at: partial, to: target)
-        return target
     }
 }

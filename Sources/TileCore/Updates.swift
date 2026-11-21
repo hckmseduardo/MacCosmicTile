@@ -8,7 +8,7 @@ public struct SemanticVersion: Comparable, Hashable, Sendable {
     public let prerelease: [String]
     public init?(_ value: String) {
         let text = value.hasPrefix("v") ? String(value.dropFirst()) : value
-        let pattern = #"^(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?$"#
+        let pattern = #"\A(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)(-[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?(\+[0-9A-Za-z-]+(\.[0-9A-Za-z-]+)*)?\z"#
         guard text.range(of: pattern, options: .regularExpression) != nil else { return nil }
         let precedence = text.split(separator: "+", maxSplits: 1)[0]
         let parts = precedence.split(separator: "-", maxSplits: 1)
@@ -108,14 +108,13 @@ public struct UpdateFlow: Sendable {
 }
 
 public enum UpdateFailure: Error, LocalizedError, Sendable {
-    case invalidResponse, wrongSize, wrongDigest, busy, noDownloadsDirectory
+    case invalidResponse, wrongSize, wrongDigest, busy
     public var errorDescription: String? {
         switch self {
         case .invalidResponse: "GitHub returned an unexpected response. Please try again later."
         case .wrongSize: "The download size did not match the release metadata. The file was discarded."
         case .wrongDigest: "The download checksum did not match GitHub's SHA-256 digest. The file was discarded."
         case .busy: "An update operation is already in progress."
-        case .noDownloadsDirectory: "The Downloads folder is not available."
         }
     }
 }

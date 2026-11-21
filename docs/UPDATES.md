@@ -2,15 +2,19 @@
 
 CosmicTile checks the public GitHub releases list at startup and at most once per 24 hours. **Check for updates…** runs an immediate check, and **Automatically check for updates** can disable scheduled checks. Current preview releases are included. No GitHub account or runtime token is required.
 
-A compatible newer release displays its version, notes and download size. **Later** is the default keyboard action. **Download ZIP** is the only action that authorizes a package request; opening release notes does not authorize a download. Declining suppresses that version's automatic prompt, while manual checks remain available.
+A compatible newer release displays its version, notes and download size. **Later** is the default keyboard action. **Install and Restart** authorizes the download and installation. Declining suppresses that version's automatic prompt, while manual checks remain available.
 
 ## Download and installation
 
-Approved ZIPs are written to `~/Downloads/CosmicTile Updates/`. The app enforces the native architecture filename, repository HTTPS path, uploaded state, positive bounded asset size and a GitHub-provided SHA-256 digest. Metadata and file responses are streamed with cumulative limits; mismatched lengths, checksums, HTTP failures or timeouts discard partial files. A matching existing download is reused; other files are not overwritten.
+CosmicTile downloads the approved ZIP to a private staging directory beside the installed app. The updater enforces the native architecture filename, repository HTTPS path, uploaded state, bounded asset size and a GitHub-provided SHA-256 digest. It validates the extracted bundle's identifier, version, executable architecture and code signature before quitting.
 
-The completed ZIP is revealed in Finder. Quit CosmicTile, extract the ZIP and replace the app manually. The updater does not extract, execute, replace, relaunch or change permissions automatically. Updating an ad-hoc signed macOS app can require renewed Accessibility permission.
+A helper waits for CosmicTile to quit, then atomically exchanges the staged and installed bundles. It opens the new version from the original path and retains the old bundle until the new version finishes starting. If startup fails, it swaps the previous bundle back and reopens it. If automatic recovery is blocked, the error gives the path to the preserved copy.
 
-SHA-256 validates downloaded bytes against GitHub metadata; it is not Developer ID signing, notarization or independent publisher authentication. Existing release previews remain locally signed and non-notarized.
+After a forced quit or power loss during an update, a hidden `.<app name>.app.update` directory may remain beside the installed app. If no update is running, move that directory aside before retrying. Keep any app bundle under its `payload` folder until the installed version opens successfully.
+
+The updater needs write access to the app's folder. Install in Applications or ~/Applications. Updating from v0.4.1 or earlier requires one final manual replacement. The bundle identifier stays the same, preserving saved preferences. Apple may require renewed Accessibility permission after replacing an ad-hoc signed bundle.
+
+SHA-256 validates downloaded bytes against GitHub metadata. Code signature verification checks the integrity of the extracted bundle. Preview builds use ad-hoc signing. They are distributed without Apple notarization.
 
 ## Version and trust policy
 
